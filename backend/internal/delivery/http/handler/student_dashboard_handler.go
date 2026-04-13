@@ -24,9 +24,12 @@ func (h *StudentHandler) GetDashboard(c *gin.Context) {
 		return
 	}
 
-	id, err := uuid.Parse(userID.(string))
-	if err != nil {
-		id = userID.(uuid.UUID)
+	var id uuid.UUID
+	switch v := userID.(type) {
+	case string:
+		id, _ = uuid.Parse(v)
+	case uuid.UUID:
+		id = v
 	}
 
 	summary, err := h.useCase.GetDashboardSummary(id)
