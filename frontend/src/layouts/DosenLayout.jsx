@@ -102,7 +102,7 @@ export default function DosenLayout() {
         <header className="bg-white shadow-sm h-16 flex items-center justify-between px-4 lg:hidden border-b border-gray-200">
           <div className="flex items-center space-x-2 font-bold text-gray-800">
             <GraduationCap className="text-emerald-600" size={22} />
-            <span>GeoPresence</span>
+            <span>SENTRA</span>
           </div>
           <button onClick={() => setSidebarOpen(true)} className="text-gray-600 hover:text-emerald-600 p-2 rounded-lg">
             <Menu size={22} />

@@ -9,6 +9,10 @@ import DosenLayout from './layouts/DosenLayout';
 
 // Pages
 import StudentDashboard from './pages/student/Dashboard';
+import StudentJadwal from './pages/student/Jadwal';
+import StudentRiwayat from './pages/student/Riwayat';
+import StudentPengumuman from './pages/student/Pengumuman';
+
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminDosen from './pages/admin/Dosen';
 import AdminMahasiswa from './pages/admin/Mahasiswa';
@@ -17,6 +21,8 @@ import AdminJadwal from './pages/admin/Jadwal';
 import AdminAbsensi from './pages/admin/Absensi';
 
 import DosenDashboard from './pages/dosen/Dashboard';
+import DosenKelas from './pages/dosen/Kelas';
+import DosenInputAbsensi from './pages/dosen/InputAbsensi';
 
 // Protected Route: redirect ke /login jika belum auth, atau ke /unauthorized jika role salah
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -81,9 +87,9 @@ function AppRoutes() {
         }
       >
         <Route index element={<StudentDashboard />} />
-        <Route path="jadwal" element={<Placeholder title="Jadwal Kuliah" />} />
-        <Route path="riwayat" element={<Placeholder title="Riwayat Absensi" />} />
-        <Route path="pengumuman" element={<Placeholder title="Pengumuman" />} />
+        <Route path="jadwal" element={<StudentJadwal />} />
+        <Route path="riwayat" element={<StudentRiwayat />} />
+        <Route path="pengumuman" element={<StudentPengumuman />} />
       </Route>
 
       {/* Admin Routes */}
@@ -113,8 +119,8 @@ function AppRoutes() {
         }
       >
         <Route index element={<DosenDashboard />} />
-        <Route path="kelas" element={<Placeholder title="Kelas Saya" />} />
-        <Route path="absensi" element={<Placeholder title="Input Absensi" />} />
+        <Route path="kelas" element={<DosenKelas />} />
+        <Route path="absensi" element={<DosenInputAbsensi />} />
         <Route path="matakuliah" element={<Placeholder title="Mata Kuliah" />} />
         <Route path="pengumuman" element={<Placeholder title="Pengumuman" />} />
       </Route>

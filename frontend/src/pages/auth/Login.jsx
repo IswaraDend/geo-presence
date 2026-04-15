@@ -42,17 +42,17 @@ export default function Login() {
           <div className="bg-blue-500 p-2 rounded-xl">
             <GraduationCap className="text-white" size={28} />
           </div>
-          <span className="text-white text-2xl font-bold tracking-wide">GeoPresence</span>
+          <span className="text-white text-2xl font-bold tracking-wide">SENTRA</span>
         </div>
 
         {/* Center text */}
         <div className="relative z-10 space-y-6">
           <h1 className="text-5xl font-extrabold text-white leading-tight">
-            Sistem Absensi<br />
-            <span className="text-blue-400">Berbasis Lokasi</span>
+            Sistem Early Warning<br />
+            <span className="text-blue-400">Terintegrasi Akademik</span>
           </h1>
           <p className="text-slate-300 text-lg max-w-md leading-relaxed">
-            Platform terpadu untuk memantau kehadiran mahasiswa secara real-time dengan verifikasi geolokasi yang akurat dan aman.
+            Platform terpadu untuk memantau aktivitas akademik mahasiswa secara real-time dan komprehensif.
           </p>
 
           {/* Feature pills */}
@@ -66,7 +66,7 @@ export default function Login() {
         </div>
 
         {/* Footer note */}
-        <p className="relative z-10 text-slate-500 text-sm">© 2026 GeoPresence · Sistem Absensi Digital</p>
+        <p className="relative z-10 text-slate-500 text-sm">© 2026 SENTRA · Sistem Early Warning Terintegrasi Akademik</p>
       </div>
 
       {/* Right Panel — Login Form */}
@@ -78,7 +78,7 @@ export default function Login() {
             <div className="bg-blue-500 p-2 rounded-xl">
               <GraduationCap className="text-white" size={24} />
             </div>
-            <span className="text-white text-xl font-bold">GeoPresence</span>
+            <span className="text-white text-xl font-bold">SENTRA</span>
           </div>
 
           {/* Card */}

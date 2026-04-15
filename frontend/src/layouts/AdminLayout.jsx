@@ -102,7 +102,7 @@ export default function AdminLayout() {
         <header className="bg-white shadow-sm h-16 flex items-center justify-between px-4 lg:hidden border-b border-gray-200">
           <div className="flex items-center space-x-2 font-bold text-gray-800">
             <GraduationCap className="text-blue-600" size={22} />
-            <span>GeoPresence</span>
+            <span>SENTRA</span>
           </div>
           <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-600">
             <Menu size={22} />

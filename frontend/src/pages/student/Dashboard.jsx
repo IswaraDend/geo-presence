@@ -76,9 +76,8 @@ export default function StudentDashboard() {
               </div>
               <h2 className="text-xl font-bold text-rose-600 mb-2">Peringatan Kehadiran!</h2>
               <p className="text-slate-600 mb-6 leading-relaxed">
-                Persentase kehadiran Anda{' '}
-                <span className="text-rose-600 font-bold">{percentage}%</span> berada di bawah batas minimum.
-                Segera perbaiki agar dapat mengikuti Ujian Akhir Semester.
+                Sistem mendeteksi Anda sudah tidak hadir sebanyak <span className="text-rose-600 font-bold">3 kali</span> di setidaknya satu kelas Mata Kuliah.
+                Segera perbaiki atau hubungi dosen pengampu agar dapat mengikuti Ujian Akhir Semester.
               </p>
               <button
                 onClick={() => setShowWarning(false)}

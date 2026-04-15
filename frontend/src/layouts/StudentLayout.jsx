@@ -30,7 +30,7 @@ export default function StudentLayout() {
             <div className="bg-white/20 p-1.5 rounded-lg">
               <GraduationCap size={20} className="text-white" />
             </div>
-            <span className="font-bold text-lg tracking-wide">GeoPresence</span>
+            <span className="font-bold text-lg tracking-wide">SENTRA</span>
           </div>
 
           {/* Desktop nav */}
