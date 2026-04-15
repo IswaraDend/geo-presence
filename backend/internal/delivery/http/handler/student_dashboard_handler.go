@@ -34,9 +34,9 @@ func (h *StudentHandler) GetDashboard(c *gin.Context) {
 
 	summary, err := h.useCase.GetDashboardSummary(id)
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, "Failed to load dashboard data")
+		response.Error(c, http.StatusInternalServerError, "Gagal memuat data dashboard")
 		return
 	}
 
-	response.Success(c, http.StatusOK, "Dashboard data loaded", summary)
+	response.Success(c, http.StatusOK, "Data dashboard berhasil dimuat", summary)
 }

@@ -9,8 +9,8 @@ import (
 )
 
 type StudentDashboardRepository interface {
-	GetAttendancesByStudent(studentID uuid.UUID) ([]entity.Attendance, error)
-	GetTodaySchedules(studentID uuid.UUID) ([]entity.Schedule, error)
+	GetAttendancesByMahasiswa(mahasiswaID uuid.UUID) ([]entity.Attendance, error)
+	GetTodaySchedulesByKelas(kelasID uuid.UUID) ([]entity.JadwalKuliah, error)
 }
 
 type studentDashboardRepository struct {
@@ -21,17 +21,18 @@ func NewStudentDashboardRepository(db *gorm.DB) StudentDashboardRepository {
 	return &studentDashboardRepository{db}
 }
 
-func (r *studentDashboardRepository) GetAttendancesByStudent(studentID uuid.UUID) ([]entity.Attendance, error) {
+func (r *studentDashboardRepository) GetAttendancesByMahasiswa(mahasiswaID uuid.UUID) ([]entity.Attendance, error) {
 	var attendances []entity.Attendance
-	err := r.db.Preload("Course").Preload("Schedule").Where("student_id = ?", studentID).Order("date desc").Find(&attendances).Error
+	err := r.db.
+		Preload("Jadwal.MataKuliah").
+		Preload("Jadwal.Dosen.User").
+		Where("mahasiswa_id = ?", mahasiswaID).
+		Order("tanggal desc").
+		Find(&attendances).Error
 	return attendances, err
 }
 
-func (r *studentDashboardRepository) GetTodaySchedules(studentID uuid.UUID) ([]entity.Schedule, error) {
-	// Simplified: In a real app we'd map today's weekday to the 'day' column (e.g. "Senin", "Selasa")
-	// For demonstration, we just return upcoming schedules
-	// Assuming day string is simple like "Senin"
-	currentTime := time.Now()
+func (r *studentDashboardRepository) GetTodaySchedulesByKelas(kelasID uuid.UUID) ([]entity.JadwalKuliah, error) {
 	weekdays := map[time.Weekday]string{
 		time.Sunday:    "Minggu",
 		time.Monday:    "Senin",
@@ -41,11 +42,14 @@ func (r *studentDashboardRepository) GetTodaySchedules(studentID uuid.UUID) ([]e
 		time.Friday:    "Jumat",
 		time.Saturday:  "Sabtu",
 	}
-	today := weekdays[currentTime.Weekday()]
+	today := weekdays[time.Now().Weekday()]
 
-	var schedules []entity.Schedule
-	// A real production query would join Student -> Class -> Schedule, etc.
-	// We'll just fetch by day
-	err := r.db.Preload("Course").Where("day = ?", today).Find(&schedules).Error
+	var schedules []entity.JadwalKuliah
+	err := r.db.
+		Preload("MataKuliah").
+		Preload("Dosen.User").
+		Where("kelas_id = ? AND hari = ?", kelasID, today).
+		Order("jam_mulai asc").
+		Find(&schedules).Error
 	return schedules, err
 }

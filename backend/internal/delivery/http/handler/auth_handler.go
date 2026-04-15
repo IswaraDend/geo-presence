@@ -22,38 +22,27 @@ type LoginRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
-func (h *AuthHandler) AdminLogin(c *gin.Context) {
+// Login adalah satu endpoint universal untuk semua role (admin, dosen, mahasiswa)
+func (h *AuthHandler) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	token, err := h.useCase.LoginAdmin(req.Email, req.Password)
+	result, err := h.useCase.Login(req.Email, req.Password)
 	if err != nil {
 		response.Error(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	response.Success(c, http.StatusOK, "Login success", gin.H{"token": token})
+	response.Success(c, http.StatusOK, "Login berhasil", gin.H{
+		"token": result.Token,
+		"role":  result.Role,
+	})
 }
 
-func (h *AuthHandler) StudentLogin(c *gin.Context) {
-	var req LoginRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	token, err := h.useCase.LoginStudent(req.Email, req.Password)
-	if err != nil {
-		response.Error(c, http.StatusUnauthorized, err.Error())
-		return
-	}
-
-	response.Success(c, http.StatusOK, "Login success", gin.H{"token": token})
-}
-
+// GetMe mengembalikan data user yang sedang login (+ profil spesifik sesuai role)
 func (h *AuthHandler) GetMe(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
@@ -71,15 +60,34 @@ func (h *AuthHandler) GetMe(c *gin.Context) {
 
 	role, _ := c.Get("role")
 
-	if role == "student" {
-		student, err := h.useCase.GetStudentProfile(id)
-		if err != nil {
-			response.Error(c, http.StatusNotFound, "User not found")
-			return
-		}
-		response.Success(c, http.StatusOK, "Profile fetched", student)
+	user, err := h.useCase.GetUserByID(id)
+	if err != nil {
+		response.Error(c, http.StatusNotFound, "User tidak ditemukan")
 		return
 	}
 
-	response.Success(c, http.StatusOK, "Profile fetched", gin.H{"id": id, "role": role})
+	switch role {
+	case "mahasiswa":
+		mhs, err := h.useCase.GetMahasiswaByUserID(id)
+		if err != nil {
+			response.Success(c, http.StatusOK, "Data akun berhasil diambil", user)
+			return
+		}
+		response.Success(c, http.StatusOK, "Data akun berhasil diambil", gin.H{
+			"user":      user,
+			"mahasiswa": mhs,
+		})
+	case "dosen":
+		dosen, err := h.useCase.GetDosenByUserID(id)
+		if err != nil {
+			response.Success(c, http.StatusOK, "Data akun berhasil diambil", user)
+			return
+		}
+		response.Success(c, http.StatusOK, "Data akun berhasil diambil", gin.H{
+			"user":  user,
+			"dosen": dosen,
+		})
+	default:
+		response.Success(c, http.StatusOK, "Data akun berhasil diambil", user)
+	}
 }

@@ -15,30 +15,23 @@ export const AuthProvider = ({ children }) => {
           const res = await api.get('/auth/me');
           setUser(res.data.data);
         } catch (error) {
-          console.error("Failed to fetch user:", error);
+          console.error('Failed to fetch user:', error);
           localStorage.removeItem('token');
         }
       }
       setLoading(false);
     };
-
     fetchUser();
   }, []);
 
-  const loginStudent = async (email, password) => {
-    const res = await api.post('/auth/student/login', { email, password });
-    localStorage.setItem('token', res.data.data.token);
+  // Satu endpoint login universal — backend mendeteksi role dari DB
+  const login = async (email, password) => {
+    const res = await api.post('/auth/login', { email, password });
+    const { token, role } = res.data.data;
+    localStorage.setItem('token', token);
     const userRes = await api.get('/auth/me');
     setUser(userRes.data.data);
-    return userRes.data.data;
-  };
-
-  const loginAdmin = async (email, password) => {
-    const res = await api.post('/auth/admin/login', { email, password });
-    localStorage.setItem('token', res.data.data.token);
-    const userRes = await api.get('/auth/me');
-    setUser(userRes.data.data);
-    return userRes.data.data;
+    return { user: userRes.data.data, role };
   };
 
   const logout = () => {
@@ -47,7 +40,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginStudent, loginAdmin, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {!loading && children}
     </AuthContext.Provider>
   );

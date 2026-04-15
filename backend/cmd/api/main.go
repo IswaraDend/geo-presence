@@ -14,59 +14,67 @@ import (
 )
 
 func main() {
-	// Load config
 	cfg := config.LoadConfig()
-
-	// Init DB
 	db := database.InitDB(cfg)
 
-	// Migrate DB
+	// AutoMigrate
 	err := db.AutoMigrate(
+		&entity.User{},
 		&entity.Admin{},
-		&entity.Student{},
-		&entity.Course{},
-		&entity.Schedule{},
+		&entity.Dosen{},
+		&entity.Kelas{},
+		&entity.Mahasiswa{},
+		&entity.MataKuliah{},
+		&entity.KelasMataKuliah{},
+		&entity.JadwalKuliah{},
 		&entity.Attendance{},
 		&entity.Announcement{},
 	)
 	if err != nil {
-		log.Fatalf("Failed to migrate database: %v", err)
+		log.Fatalf("AutoMigrate gagal: %v", err)
 	}
 
-	// Seed Admin
+	// Composite unique index
+	db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_attendance_unique ON attendances(mahasiswa_id, jadwal_id, pertemuan_ke) WHERE deleted_at IS NULL")
+
+	// Seed Admin default
 	var count int64
-	db.Model(&entity.Admin{}).Count(&count)
+	db.Model(&entity.User{}).Where("role = ?", "admin").Count(&count)
 	if count == 0 {
 		hashedPass, _ := hash.HashPassword("admin123")
-		admin := entity.Admin{
-			Name:     "Super Admin",
-			Email:    "admin@kampus.ac.id",
-			Password: hashedPass,
-			Role:     "admin",
+		user := entity.User{
+			Nama:         "Super Admin",
+			Email:        "admin@kampus.ac.id",
+			PasswordHash: hashedPass,
+			Role:         "admin",
+			IsActive:     true,
 		}
-		db.Create(&admin)
-		log.Println("Seeded default admin (admin@kampus.ac.id / admin123)")
+		db.Create(&user)
+		db.Create(&entity.Admin{UserID: user.ID, KodeAdmin: "ADM001"})
+		log.Println("Seeded: admin@kampus.ac.id / admin123")
 	}
 
-	// Init Repo
+	// Init Repositories
 	authRepo := repository.NewAuthRepository(db)
+	adminRepo := repository.NewAdminRepository(db)
 
-	// Init UseCase
+	// Init UseCases
 	authUseCase := usecase.NewAuthUseCase(authRepo, cfg)
+	studentUseCase := usecase.NewStudentDashboardUseCase(
+		repository.NewStudentDashboardRepository(db),
+		authRepo,
+	)
+	adminUseCase := usecase.NewAdminUseCase(adminRepo)
 
-	// Init Handler
+	// Init Handlers
 	authHandler := handler.NewAuthHandler(authUseCase)
-
-	studentRepo := repository.NewStudentDashboardRepository(db)
-	studentUseCase := usecase.NewStudentDashboardUseCase(studentRepo)
 	studentHandler := handler.NewStudentHandler(studentUseCase)
+	adminHandler := handler.NewAdminHandler(adminUseCase)
 
-	// Setup Router
-	r := route.SetupRouter(cfg, authHandler, studentHandler)
-
-	// Run
-	log.Printf("Starting server on port %s", cfg.Port)
+	// Start
+	r := route.SetupRouter(cfg, authHandler, studentHandler, adminHandler)
+	log.Printf("Server berjalan di port %s", cfg.Port)
 	if err := r.Run(":" + cfg.Port); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+		log.Fatalf("Server gagal: %v", err)
 	}
 }

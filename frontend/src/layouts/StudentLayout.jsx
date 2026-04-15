@@ -1,56 +1,113 @@
-import { LogOut, User, Home, Calendar, ClipboardList, Bell } from 'lucide-react';
+import { LogOut, User, Home, Calendar, ClipboardList, Bell, GraduationCap, Menu, X } from 'lucide-react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useState } from 'react';
 
 export default function StudentLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
+  const navItems = [
+    { to: '/student', icon: <Home size={18} />, label: 'Beranda', end: true },
+    { to: '/student/jadwal', icon: <Calendar size={18} />, label: 'Jadwal Kuliah' },
+    { to: '/student/riwayat', icon: <ClipboardList size={18} />, label: 'Riwayat Absensi' },
+    { to: '/student/pengumuman', icon: <Bell size={18} />, label: 'Pengumuman' },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#f0f4f8] flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-100 flex flex-col font-sans">
       {/* Top Header */}
-      <header className="bg-blue-600 text-white shadow-md">
-        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <h1 className="text-xl font-bold tracking-wider">Dashboard Absensi Mahasiswa</h1>
-          <div className="flex flex-row items-center space-x-4">
-            <div className="flex items-center space-x-2 bg-blue-700 py-1 px-3 rounded-full">
-              <div className="bg-white text-blue-600 p-1 rounded-full">
-                <User size={18} />
-              </div>
-              <span className="font-medium text-sm">{user?.name || "Student"}</span>
+      <header className="bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-lg sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center space-x-2.5">
+            <div className="bg-white/20 p-1.5 rounded-lg">
+              <GraduationCap size={20} className="text-white" />
             </div>
-            <button onClick={handleLogout} className="text-blue-100 hover:text-white hover:bg-blue-700 p-2 rounded-full transition-colors" title="Logout">
-              <LogOut size={20} />
+            <span className="font-bold text-lg tracking-wide">GeoPresence</span>
+          </div>
+
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center space-x-1">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={({ isActive }) =>
+                  `flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    isActive
+                      ? 'bg-white text-blue-700 shadow-sm'
+                      : 'text-blue-100 hover:bg-white/15 hover:text-white'
+                  }`
+                }
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </NavLink>
+            ))}
+          </nav>
+
+          {/* User + Logout */}
+          <div className="flex items-center space-x-3">
+            <div className="hidden sm:flex items-center space-x-2 bg-white/15 px-3 py-1.5 rounded-full">
+              <div className="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center">
+                <User size={14} className="text-white" />
+              </div>
+              <span className="text-sm font-medium text-white max-w-[120px] truncate">
+                {user?.nama || user?.name || 'Mahasiswa'}
+              </span>
+            </div>
+            <button
+              onClick={handleLogout}
+              title="Logout"
+              className="bg-white/15 hover:bg-red-500 p-2 rounded-lg transition-colors"
+            >
+              <LogOut size={18} className="text-white" />
+            </button>
+            {/* Mobile menu toggle */}
+            <button
+              className="md:hidden p-2 rounded-lg bg-white/15"
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
+              {menuOpen ? <X size={18} className="text-white" /> : <Menu size={18} className="text-white" />}
             </button>
           </div>
         </div>
+
+        {/* Mobile dropdown nav */}
+        {menuOpen && (
+          <div className="md:hidden border-t border-white/20 bg-blue-700 px-4 py-3 space-y-1">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                onClick={() => setMenuOpen(false)}
+                className={({ isActive }) =>
+                  `flex items-center space-x-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                    isActive
+                      ? 'bg-white text-blue-700'
+                      : 'text-blue-100 hover:bg-white/15'
+                  }`
+                }
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </NavLink>
+            ))}
+          </div>
+        )}
       </header>
 
-      {/* Navigation Tabs */}
-      <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="container mx-auto px-4 flex space-x-1 overflow-x-auto">
-          <NavLink to="/" className={({isActive}) => `flex items-center space-x-2 py-3 px-4 outline-none border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${isActive ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-blue-600 hover:bg-gray-50'}`}>
-            <Home size={18} /> <span>Beranda</span>
-          </NavLink>
-          <NavLink to="/jadwal" className={({isActive}) => `flex items-center space-x-2 py-3 px-4 outline-none border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${isActive ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-blue-600 hover:bg-gray-50'}`}>
-            <Calendar size={18} /> <span>Jadwal Kuliah</span>
-          </NavLink>
-          <NavLink to="/riwayat" className={({isActive}) => `flex items-center space-x-2 py-3 px-4 outline-none border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${isActive ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-blue-600 hover:bg-gray-50'}`}>
-            <ClipboardList size={18} /> <span>Riwayat Absensi</span>
-          </NavLink>
-          <NavLink to="/pengumuman" className={({isActive}) => `flex items-center space-x-2 py-3 px-4 outline-none border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${isActive ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-blue-600 hover:bg-gray-50'}`}>
-            <Bell size={18} /> <span>Pengumuman</span>
-          </NavLink>
-        </div>
-      </nav>
-
-      {/* Main Content Area */}
-      <main className="flex-1 container mx-auto px-4 py-8">
+      {/* Content */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-8">
         <Outlet />
       </main>
     </div>
