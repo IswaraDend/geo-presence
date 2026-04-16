@@ -13,6 +13,10 @@ FROM alpine:latest
 
 WORKDIR /app
 
+RUN apk add --no-cache tzdata
+
+ENV TZ=Asia/Jakarta
+
 COPY --from=builder /app/main .
 
 EXPOSE 8080
