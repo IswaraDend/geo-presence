@@ -15,6 +15,7 @@ export default function AdminLayout() {
 
   const navItems = [
     { to: '/admin', icon: <Home size={20} />, label: 'Dashboard' },
+    { to: '/admin/dosen', icon: <GraduationCap size={20} />, label: 'Dosen' },
     { to: '/admin/students', icon: <Users size={20} />, label: 'Mahasiswa' },
     { to: '/admin/courses', icon: <BookOpen size={20} />, label: 'Mata Kuliah' },
     { to: '/admin/schedules', icon: <CalendarIcon size={20} />, label: 'Jadwal' },
