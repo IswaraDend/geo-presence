@@ -2,7 +2,6 @@ package repository
 
 import (
 	"absensi-backend/internal/entity"
-	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -10,7 +9,8 @@ import (
 
 type StudentDashboardRepository interface {
 	GetAttendancesByMahasiswa(mahasiswaID uuid.UUID) ([]entity.Attendance, error)
-	GetTodaySchedulesByKelas(kelasID uuid.UUID) ([]entity.JadwalKuliah, error)
+	GetSchedulesByKelas(kelasID uuid.UUID) ([]entity.JadwalKuliah, error)
+	GetAnnouncements(role string) ([]entity.Announcement, error)
 }
 
 type studentDashboardRepository struct {
@@ -33,23 +33,26 @@ func (r *studentDashboardRepository) GetAttendancesByMahasiswa(mahasiswaID uuid.
 }
 
 func (r *studentDashboardRepository) GetTodaySchedulesByKelas(kelasID uuid.UUID) ([]entity.JadwalKuliah, error) {
-	weekdays := map[time.Weekday]string{
-		time.Sunday:    "Minggu",
-		time.Monday:    "Senin",
-		time.Tuesday:   "Selasa",
-		time.Wednesday: "Rabu",
-		time.Thursday:  "Kamis",
-		time.Friday:    "Jumat",
-		time.Saturday:  "Sabtu",
-	}
-	today := weekdays[time.Now().Weekday()]
+	// Implementation for GetTodaySchedulesByKelas
+	return nil, nil
+}
 
+func (r *studentDashboardRepository) GetSchedulesByKelas(kelasID uuid.UUID) ([]entity.JadwalKuliah, error) {
 	var schedules []entity.JadwalKuliah
 	err := r.db.
 		Preload("MataKuliah").
 		Preload("Dosen.User").
-		Where("kelas_id = ? AND hari = ?", kelasID, today).
-		Order("jam_mulai asc").
+		Where("kelas_id = ?", kelasID).
+		Order("hari asc, jam_mulai asc").
 		Find(&schedules).Error
 	return schedules, err
+}
+
+func (r *studentDashboardRepository) GetAnnouncements(role string) ([]entity.Announcement, error) {
+	var announcements []entity.Announcement
+	err := r.db.
+		Where("target_role = ? OR target_role = 'all'", role).
+		Order("created_at desc").
+		Find(&announcements).Error
+	return announcements, err
 }

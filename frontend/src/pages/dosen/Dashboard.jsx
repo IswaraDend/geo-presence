@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
   BookOpen, Users, ClipboardList, Calendar,
@@ -23,6 +24,7 @@ const StatCard = ({ title, value, sub, icon: Icon, gradient }) => (
 );
 
 export default function DosenDashboard() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
@@ -145,7 +147,10 @@ export default function DosenDashboard() {
                     <p className="font-semibold text-slate-800 truncate">{j.mataKuliah}</p>
                     <p className="text-sm text-slate-500">{j.kelas} · Ruang {j.ruang}</p>
                   </div>
-                  <button className="shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
+                  <button 
+                    onClick={() => navigate(`/dosen/absensi?jadwal_id=${j.id}`)}
+                    className="shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors"
+                  >
                     Input Absensi
                   </button>
                 </div>

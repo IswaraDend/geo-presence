@@ -12,6 +12,8 @@ type DosenDashboardRepository interface {
 	GetJadwalByDosenID(dosenID uuid.UUID) ([]entity.JadwalKuliah, error)
 	GetAbsensiByJadwalIDs(jadwalIDs []uuid.UUID) ([]entity.Attendance, error)
 	GetMahasiswaByKelasIDs(kelasIDs []uuid.UUID) ([]entity.Mahasiswa, error)
+	BulkCreateAbsensi(attendances []entity.Attendance) error
+	GetJadwalByID(id uuid.UUID) (*entity.JadwalKuliah, error)
 }
 
 type dosenDashboardRepository struct {
@@ -41,7 +43,20 @@ func (r *dosenDashboardRepository) GetAbsensiByJadwalIDs(jadwalIDs []uuid.UUID) 
 }
 
 func (r *dosenDashboardRepository) GetMahasiswaByKelasIDs(kelasIDs []uuid.UUID) ([]entity.Mahasiswa, error) {
+	if len(kelasIDs) == 0 {
+		return []entity.Mahasiswa{}, nil
+	}
 	var list []entity.Mahasiswa
 	err := r.db.Preload("Kelas").Preload("User").Where("kelas_id IN ?", kelasIDs).Find(&list).Error
 	return list, err
+}
+
+func (r *dosenDashboardRepository) BulkCreateAbsensi(absensi []entity.Attendance) error {
+	return r.db.Create(&absensi).Error
+}
+
+func (r *dosenDashboardRepository) GetJadwalByID(id uuid.UUID) (*entity.JadwalKuliah, error) {
+	var j entity.JadwalKuliah
+	err := r.db.Preload("Kelas").Where("id = ?", id).First(&j).Error
+	return &j, err
 }

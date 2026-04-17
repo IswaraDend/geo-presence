@@ -1,15 +1,51 @@
-import React from 'react';
-import { Calendar, Clock, MapPin, User, ChevronRight } from 'lucide-react';
-
-const mockJadwal = [
-  { id: 1, hari: 'Senin', mk: 'Pemrograman Web', dosen: 'Dr. Budi Santoso', ruang: 'Lab Komputer 1', mulai: '08:00', selesai: '10:30', status: 'Selesai' },
-  { id: 2, hari: 'Senin', mk: 'Basis Data Lanjut', dosen: 'Sari Dewi, M.Kom', ruang: 'Ruang 302', mulai: '13:00', selesai: '15:30', status: 'Berlangsung' },
-  { id: 3, hari: 'Selasa', mk: 'Kecerdasan Buatan', dosen: 'Dr. Andi', ruang: 'Lab Komputer 2', mulai: '09:00', selesai: '11:00', status: 'Belum Mulai' },
-  { id: 4, hari: 'Rabu', mk: 'Jaringan Komputer', dosen: 'Bpk. Ahmad', ruang: 'Ruang 105', mulai: '10:00', selesai: '12:30', status: 'Belum Mulai' },
-];
+import React, { useState, useEffect } from 'react';
+import { Calendar, Clock, MapPin, User, AlertCircle, Loader2 } from 'lucide-react';
+import api from '../../api/axios';
 
 export default function Jadwal() {
-  const hariIni = 'Senin'; // Mock current day
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await api.get('/student/dashboard');
+        setData(res.data.data);
+      } catch (err) {
+        console.error('Failed to fetch schedules:', err);
+        setError('Gagal memuat jadwal kuliah');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+          <p className="text-slate-500 text-sm font-medium">Memuat jadwal kuliah...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] bg-white rounded-2xl border border-slate-100 p-8 shadow-sm">
+        <AlertCircle size={48} className="text-rose-400 mb-4" />
+        <h2 className="text-xl font-bold text-slate-800">Gagal Memuat Jadwal</h2>
+        <p className="text-slate-500 text-center mt-2 max-w-sm">{error}</p>
+        <button onClick={() => window.location.reload()} className="mt-6 bg-blue-600 text-white px-6 py-2 rounded-xl font-semibold">Coba Lagi</button>
+      </div>
+    );
+  }
+
+  const hariIni = new Intl.DateTimeFormat('id-ID', { weekday: 'long' }).format(new Date());
+  const allSchedules = data.all_schedules || [];
 
   return (
     <div className="space-y-6">
@@ -22,8 +58,8 @@ export default function Jadwal() {
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'].map(hari => {
-          const jadwalHariIni = mockJadwal.filter(j => j.hari === hari);
+        {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'].map(hari => {
+          const jadwalHariIni = allSchedules.filter(j => j.hari === hari);
           if (jadwalHariIni.length === 0) return null;
 
           return (
@@ -38,23 +74,18 @@ export default function Jadwal() {
                 {jadwalHariIni.map(j => (
                   <div key={j.id} className="p-6 flex flex-col md:flex-row gap-6 items-start md:items-center hover:bg-slate-50 transition-colors">
                     <div className="bg-slate-100/50 border border-slate-200 rounded-xl px-5 py-4 flex flex-col items-center justify-center min-w-[120px]">
-                      <span className="text-lg font-extrabold text-slate-800">{j.mulai}</span>
-                      <span className="text-xs font-semibold text-slate-400 mt-1">s/d {j.selesai}</span>
+                      <span className="text-lg font-extrabold text-slate-800">{j.jam_mulai}</span>
+                      <span className="text-xs font-semibold text-slate-400 mt-1">s/d {j.jam_selesai}</span>
                     </div>
                     <div className="flex-1 space-y-2">
-                      <h3 className="text-xl font-bold text-slate-800">{j.mk}</h3>
+                      <h3 className="text-xl font-bold text-slate-800">{j.mata_kuliah?.nama_mk}</h3>
                       <div className="flex flex-wrap gap-4 text-sm font-medium text-slate-500">
-                        <div className="flex items-center gap-1.5"><User size={16} className="text-blue-500"/> {j.dosen}</div>
-                        <div className="flex items-center gap-1.5"><MapPin size={16} className="text-rose-500"/> {j.ruang}</div>
-                      </div>
-                    </div>
-                    <div className="w-full md:w-auto flex items-center justify-end">
-                      <div className={`px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 ${
-                        j.status === 'Berlangsung' ? 'bg-emerald-100 text-emerald-700' : 
-                        j.status === 'Selesai' ? 'bg-slate-100 text-slate-600' : 'bg-blue-100 text-blue-700'
-                      }`}>
-                        {j.status === 'Berlangsung' && <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />}
-                        {j.status}
+                        <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 rounded-lg border border-slate-100">
+                          <User size={14} className="text-blue-500"/> {j.dosen?.user?.nama}
+                        </div>
+                        <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 rounded-lg border border-slate-100">
+                          <MapPin size={14} className="text-rose-500"/> Ruang {j.ruang}
+                        </div>
                       </div>
                     </div>
                   </div>

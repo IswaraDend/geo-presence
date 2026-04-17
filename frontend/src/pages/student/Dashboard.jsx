@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { AlertTriangle, X, Calendar, Clock, BookOpen, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
@@ -12,6 +13,7 @@ const statusConfig = {
 };
 
 export default function StudentDashboard() {
+  const location = useLocation();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showWarning, setShowWarning] = useState(false);
@@ -32,7 +34,7 @@ export default function StudentDashboard() {
       }
     };
     fetchData();
-  }, []);
+  }, [location.pathname]);
 
   if (loading) {
     return (
@@ -67,7 +69,7 @@ export default function StudentDashboard() {
       {/* Modal Peringatan */}
       {showWarning && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg relative animate-in zoom-in-95 duration-200">
             <button
               onClick={() => setShowWarning(false)}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors"
@@ -79,13 +81,25 @@ export default function StudentDashboard() {
                 <AlertTriangle size={36} className="text-rose-500" />
               </div>
               <h2 className="text-xl font-bold text-rose-600 mb-2">Peringatan Kehadiran!</h2>
-              <p className="text-slate-600 mb-6 leading-relaxed">
-                Sistem mendeteksi Anda sudah tidak hadir sebanyak <span className="text-rose-600 font-bold">3 kali</span> di setidaknya satu kelas Mata Kuliah.
-                Segera perbaiki atau hubungi dosen pengampu agar dapat mengikuti Ujian Akhir Semester.
+              <p className="text-slate-500 mb-6 text-sm">
+                Sistem mendeteksi kehadiran Anda di bawah <span className="font-bold text-rose-500">75%</span> pada mata kuliah berikut:
               </p>
+              
+              <div className="w-full space-y-3 mb-8 max-h-[200px] overflow-y-auto pr-2">
+                {data.warnings?.map((w, i) => (
+                  <div key={i} className="flex justify-between items-center p-3 rounded-xl bg-rose-50 border border-rose-100">
+                    <div className="text-left flex-1 min-w-0 pr-4">
+                      <p className="font-bold text-slate-800 text-sm truncate">{w.mata_kuliah}</p>
+                      <p className="text-xs text-rose-600 font-medium">{w.hadir} / {w.total} Pertemuan</p>
+                    </div>
+                    <span className="text-rose-700 font-extrabold text-lg">{Math.round(w.persentase)}%</span>
+                  </div>
+                ))}
+              </div>
+
               <button
                 onClick={() => setShowWarning(false)}
-                className="w-full bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2.5 rounded-xl transition-colors"
+                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition-all shadow-lg active:scale-95"
               >
                 Saya Mengerti
               </button>

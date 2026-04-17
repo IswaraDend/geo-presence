@@ -40,6 +40,8 @@ func SetupRouter(
 	{
 		dosenGroup.GET("/dashboard", dosenHandler.GetDashboard)
 		dosenGroup.GET("/kelas", dosenHandler.GetKelas)
+		dosenGroup.GET("/mahasiswa", dosenHandler.GetMahasiswa)
+		dosenGroup.POST("/absensi", dosenHandler.SubmitAbsensi)
 	}
 
 	// ─── Admin (role: admin) ──────────────────────────────────────

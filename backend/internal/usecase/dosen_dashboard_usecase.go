@@ -14,6 +14,25 @@ type DosenDashboardSummary struct {
 	PeringatanMhs []WarningInfo     `json:"perigatanMhs"`
 }
 
+type BulkAbsensiRequest struct {
+	JadwalID    uuid.UUID      `json:"jadwalId"`
+	Tanggal     string         `json:"tanggal"` // YYYY-MM-DD
+	PertemuanKe int            `json:"pertemuanKe"`
+	Data        []StudentAbsen `json:"data"`
+}
+
+type StudentAbsen struct {
+	MahasiswaID uuid.UUID `json:"mahasiswaId"`
+	Status      string    `json:"status"` // hadir, alfa, izin, sakit
+	Keterangan  string    `json:"keterangan"`
+}
+
+type MhsInfo struct {
+	ID   uuid.UUID `json:"id"`
+	NIM  string    `json:"nim"`
+	Nama string    `json:"nama"`
+}
+
 type JadwalDosenInfo struct {
 	ID         string `json:"id"`
 	MataKuliah string `json:"mataKuliah"`
@@ -34,6 +53,8 @@ type StatsKelasInfo struct {
 type DosenDashboardUseCase interface {
 	GetDashboardSummary(userID uuid.UUID) (*DosenDashboardSummary, error)
 	GetKelasList(userID uuid.UUID) ([]StatsKelasInfo, error)
+	GetMahasiswaByJadwal(jadwalID uuid.UUID) ([]MhsInfo, error)
+	SubmitBulkAbsensi(req BulkAbsensiRequest) error
 }
 
 type dosenDashboardUseCase struct {
@@ -66,7 +87,7 @@ func (u *dosenDashboardUseCase) GetDashboardSummary(userID uuid.UUID) (*DosenDas
 	if err != nil {
 		absensiList = []entity.Attendance{} // empty is ok
 	}
-	
+
 	mhsList, err := u.repo.GetMahasiswaByKelasIDs(kelasIDs)
 	if err != nil {
 		mhsList = []entity.Mahasiswa{}
@@ -104,7 +125,7 @@ func (u *dosenDashboardUseCase) GetDashboardSummary(userID uuid.UUID) (*DosenDas
 	for _, a := range absensiList {
 		absensiByJadwal[a.JadwalID] = append(absensiByJadwal[a.JadwalID], a)
 	}
-	
+
 	// Map mahasiswa ke kelas
 	mhsByKelas := make(map[uuid.UUID][]entity.Mahasiswa)
 	for _, m := range mhsList {
@@ -113,15 +134,17 @@ func (u *dosenDashboardUseCase) GetDashboardSummary(userID uuid.UUID) (*DosenDas
 
 	for _, j := range jadwalList {
 		relevantMhs := mhsByKelas[j.KelasID]
-		if len(relevantMhs) == 0 { continue }
+		if len(relevantMhs) == 0 {
+			continue
+		}
 
 		// Hitung rata kehadiran untuk jadwal ini
 		// (Asumsi 1 jadwal = 1 MK di kelas itu)
 		relevantAbs := absensiByJadwal[j.ID]
-		
+
 		totalHadir := 0
 		totalRecord := len(relevantAbs)
-		
+
 		if totalRecord > 0 {
 			for _, a := range relevantAbs {
 				if a.StatusAbsensi == "hadir" {
@@ -154,14 +177,18 @@ func (u *dosenDashboardUseCase) GetDashboardSummary(userID uuid.UUID) (*DosenDas
 		for _, a := range absensiByJadwal[j.ID] {
 			relevantAbsByMhs[a.MahasiswaID] = append(relevantAbsByMhs[a.MahasiswaID], a.StatusAbsensi)
 		}
-		
+
 		for _, m := range mhsByKelas[j.KelasID] {
 			statuses := relevantAbsByMhs[m.ID]
-			if len(statuses) < 4 { continue } // Minimal 4 pertemuan baru kena warning jika rendah
-			
+			if len(statuses) < 4 {
+				continue
+			} // Minimal 4 pertemuan baru kena warning jika rendah
+
 			hadir := 0
 			for _, s := range statuses {
-				if s == "hadir" { hadir++ }
+				if s == "hadir" {
+					hadir++
+				}
 			}
 			perc := (hadir * 100) / len(statuses)
 			if perc < 75 {
@@ -185,4 +212,48 @@ func (u *dosenDashboardUseCase) GetKelasList(userID uuid.UUID) ([]StatsKelasInfo
 		return nil, err
 	}
 	return summary.StatsKelas, nil
+}
+
+func (u *dosenDashboardUseCase) GetMahasiswaByJadwal(jadwalID uuid.UUID) ([]MhsInfo, error) {
+	jadwal, err := u.repo.GetJadwalByID(jadwalID)
+	if err != nil {
+		return nil, err
+	}
+
+	mhsList, err := u.repo.GetMahasiswaByKelasIDs([]uuid.UUID{jadwal.KelasID})
+	if err != nil {
+		return nil, err
+	}
+
+	var res []MhsInfo
+	for _, m := range mhsList {
+		res = append(res, MhsInfo{
+			ID:   m.ID,
+			NIM:  m.NIM,
+			Nama: m.User.Nama,
+		})
+	}
+	return res, nil
+}
+
+func (u *dosenDashboardUseCase) SubmitBulkAbsensi(req BulkAbsensiRequest) error {
+	tanggal, err := time.Parse("2006-01-02", req.Tanggal)
+	if err != nil {
+		return err
+	}
+
+	var absensi []entity.Attendance
+	for _, d := range req.Data {
+		absensi = append(absensi, entity.Attendance{
+			ID:            uuid.New(),
+			MahasiswaID:   d.MahasiswaID,
+			JadwalID:      req.JadwalID,
+			Tanggal:       tanggal,
+			PertemuanKe:   req.PertemuanKe,
+			StatusAbsensi: d.Status,
+			Keterangan:    d.Keterangan,
+		})
+	}
+
+	return u.repo.BulkCreateAbsensi(absensi)
 }

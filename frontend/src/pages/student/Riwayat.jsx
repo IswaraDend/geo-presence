@@ -1,18 +1,43 @@
-import { useState } from 'react';
-import { CheckCircle, XCircle, AlertCircle, Calendar } from 'lucide-react';
-
-const mockRiwayat = [
-  { id: 1, mk: 'Pemrograman Web', tanggal: '2026-04-15', status: 'Hadir', waktu: '08:15', pertemuan: 7 },
-  { id: 2, mk: 'Basis Data Lanjut', tanggal: '2026-04-14', status: 'Hadir', waktu: '13:05', pertemuan: 6 },
-  { id: 3, mk: 'Kecerdasan Buatan', tanggal: '2026-04-13', status: 'Alfa', waktu: '-', pertemuan: 6 },
-  { id: 4, mk: 'Jaringan Komputer', tanggal: '2026-04-12', status: 'Izin', waktu: '-', pertemuan: 5 },
-  { id: 5, mk: 'Pemrograman Web', tanggal: '2026-04-08', status: 'Hadir', waktu: '08:10', pertemuan: 6 },
-];
+import { useState, useEffect } from 'react';
+import { CheckCircle, XCircle, AlertCircle, Calendar, Loader2 } from 'lucide-react';
+import api from '../../api/axios';
 
 export default function Riwayat() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [filter, setFilter] = useState('Semua');
 
-  const filtered = filter === 'Semua' ? mockRiwayat : mockRiwayat.filter(r => r.status === filter);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await api.get('/student/dashboard');
+        setData(res.data.data);
+      } catch (err) {
+        console.error('Failed to fetch history:', err);
+        setError('Gagal memuat riwayat absensi');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+          <p className="text-slate-500 text-sm font-medium">Memuat riwayat...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const history = data?.history || [];
+  const filtered = filter === 'Semua' 
+    ? history 
+    : history.filter(r => r.status_absensi.toLowerCase() === filter.toLowerCase());
 
   return (
     <div className="space-y-6">
@@ -22,7 +47,7 @@ export default function Riwayat() {
           <p className="text-slate-500 text-sm mt-1">Pantau seluruh catatan kehadiran Anda.</p>
         </div>
         <div className="bg-white border border-slate-200 rounded-xl p-1 flex shadow-sm">
-          {['Semua', 'Hadir', 'Izin', 'Alfa'].map(f => (
+          {['Semua', 'Hadir', 'Izin', 'Sakit', 'Alfa'].map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -44,31 +69,29 @@ export default function Riwayat() {
                 <th className="px-6 py-4 text-left">Mata Kuliah</th>
                 <th className="px-6 py-4 text-left">Tanggal</th>
                 <th className="px-6 py-4 text-left">Pertemuan</th>
-                <th className="px-6 py-4 text-left">Waktu Absen</th>
                 <th className="px-6 py-4 text-center">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filtered.map(r => (
                 <tr key={r.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-4 font-bold text-slate-800">{r.mk}</td>
+                  <td className="px-6 py-4 font-bold text-slate-800">{r.jadwal?.mata_kuliah?.nama_mk}</td>
                   <td className="px-6 py-4 text-slate-600 flex items-center gap-2">
                     <Calendar size={16} className="text-slate-400" />
                     {new Date(r.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </td>
-                  <td className="px-6 py-4 text-slate-600">Ke-{r.pertemuan}</td>
-                  <td className="px-6 py-4 text-slate-600 font-mono">{r.waktu}</td>
+                  <td className="px-6 py-4 text-slate-600">Ke-{r.pertemuan_ke}</td>
                   <td className="px-6 py-4">
                     <div className="flex justify-center">
-                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
-                        r.status === 'Hadir' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
-                        r.status === 'Izin' ? 'bg-amber-100 text-amber-700 border border-amber-200' :
-                        'bg-rose-100 text-rose-700 border border-rose-200'
+                      <span className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold uppercase ${
+                        r.status_absensi === 'hadir' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
+                        r.status_absensi === 'alfa' ? 'bg-rose-100 text-rose-700 border border-rose-200' :
+                        'bg-amber-100 text-amber-700 border border-amber-200'
                       }`}>
-                        {r.status === 'Hadir' && <CheckCircle size={12} />}
-                        {r.status === 'Izin' && <AlertCircle size={12} />}
-                        {r.status === 'Alfa' && <XCircle size={12} />}
-                        {r.status}
+                        {r.status_absensi === 'hadir' && <CheckCircle size={12} />}
+                        {(r.status_absensi === 'izin' || r.status_absensi === 'sakit') && <AlertCircle size={12} />}
+                        {r.status_absensi === 'alfa' && <XCircle size={12} />}
+                        {r.status_absensi}
                       </span>
                     </div>
                   </td>
