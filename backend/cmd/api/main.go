@@ -65,14 +65,16 @@ func main() {
 		authRepo,
 	)
 	adminUseCase := usecase.NewAdminUseCase(adminRepo)
+	dosenUseCase := usecase.NewDosenDashboardUseCase(repository.NewDosenDashboardRepository(db))
 
 	// Init Handlers
 	authHandler := handler.NewAuthHandler(authUseCase)
 	studentHandler := handler.NewStudentHandler(studentUseCase)
 	adminHandler := handler.NewAdminHandler(adminUseCase)
+	dosenHandler := handler.NewDosenHandler(dosenUseCase)
 
 	// Start
-	r := route.SetupRouter(cfg, authHandler, studentHandler, adminHandler)
+	r := route.SetupRouter(cfg, authHandler, studentHandler, adminHandler, dosenHandler)
 	log.Printf("Server berjalan di port %s", cfg.Port)
 	if err := r.Run(":" + cfg.Port); err != nil {
 		log.Fatalf("Server gagal: %v", err)

@@ -1,35 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import {
   BookOpen, Users, ClipboardList, Calendar,
   TrendingUp, CheckCircle, AlertCircle, Clock
 } from 'lucide-react';
+import api from '../../api/axios';
 
-// Mock data — ganti dengan API call ke /dosen/dashboard
-const mockData = {
-  jadwalHariIni: [
-    { id: 1, mataKuliah: 'Pemrograman Web', kelas: 'TI-3A', ruang: 'Lab 2', jamMulai: '08:00', jamSelesai: '09:40' },
-    { id: 2, mataKuliah: 'Basis Data Lanjut', kelas: 'TI-4B', ruang: 'R.101', jamMulai: '13:00', jamSelesai: '14:40' },
-  ],
-  statsKelas: [
-    { id: 1, kelas: 'TI-3A', mataKuliah: 'Pemrograman Web', totalMhs: 32, rataKehadiran: 87 },
-    { id: 2, kelas: 'TI-4B', mataKuliah: 'Basis Data Lanjut', totalMhs: 28, rataKehadiran: 78 },
-    { id: 3, kelas: 'TI-2C', mataKuliah: 'Algoritma & Pemrograman', totalMhs: 35, rataKehadiran: 91 },
-  ],
-  perigatanMhs: [
-    { id: 1, nama: 'Budi Santoso', nim: '2023011', kelas: 'TI-3A', kehadiran: 58 },
-    { id: 2, nama: 'Sari Dewi', nim: '2023045', kelas: 'TI-4B', kehadiran: 65 },
-  ],
-};
-
-const StatCard = ({ title, value, sub, icon, gradient }) => (
+const StatCard = ({ title, value, sub, icon: Icon, gradient }) => (
   <div className={`relative rounded-2xl p-6 overflow-hidden text-white ${gradient}`}>
     <div className="absolute -right-4 -bottom-4 opacity-10">
-      {React.cloneElement(icon, { size: 100 })}
+      {Icon && <Icon size={100} />}
     </div>
     <div className="relative z-10">
       <div className="bg-white/20 w-11 h-11 rounded-xl flex items-center justify-center mb-4">
-        {icon}
+        {Icon && <Icon size={24} />}
       </div>
       <p className="text-4xl font-extrabold mb-1">{value}</p>
       <p className="font-semibold text-white/90">{title}</p>
@@ -42,13 +26,21 @@ export default function DosenDashboard() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    // TODO: ganti dengan real API call: api.get('/dosen/dashboard')
-    setTimeout(() => {
-      setData(mockData);
-      setLoading(false);
-    }, 600);
+    const fetchData = async () => {
+      try {
+        const res = await api.get('/dosen/dashboard');
+        setData(res.data.data);
+      } catch (err) {
+        console.error('Failed to fetch dosen dashboard:', err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
   if (loading) {
@@ -58,6 +50,21 @@ export default function DosenDashboard() {
           <div className="w-10 h-10 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
           <p className="text-slate-500 text-sm font-medium">Memuat dashboard dosen...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] bg-white rounded-2xl border border-slate-100 p-8 shadow-sm">
+        <AlertCircle size={48} className="text-rose-400 mb-4" />
+        <h2 className="text-xl font-bold text-slate-800">Gagal Memuat Dashboard</h2>
+        <p className="text-slate-500 text-center mt-2 max-w-sm">
+          Terjadi kesalahan saat mengambil data mengajar Anda. Pastikan sesi login masih aktif.
+        </p>
+        <button onClick={() => window.location.reload()} className="mt-6 bg-emerald-600 text-white px-6 py-2 rounded-xl font-semibold hover:bg-emerald-700 transition-colors">
+          Coba Lagi
+        </button>
       </div>
     );
   }
@@ -89,28 +96,28 @@ export default function DosenDashboard() {
           title="Total Kelas"
           value={data.statsKelas.length}
           sub="Semester ini"
-          icon={<Users size={24} />}
+          icon={Users}
           gradient="bg-gradient-to-br from-emerald-600 to-emerald-800"
         />
         <StatCard
           title="Total Mahasiswa"
           value={data.statsKelas.reduce((a, k) => a + k.totalMhs, 0)}
           sub="Seluruh kelas"
-          icon={<TrendingUp size={24} />}
+          icon={TrendingUp}
           gradient="bg-gradient-to-br from-blue-600 to-blue-800"
         />
         <StatCard
           title="Rata Kehadiran"
-          value={`${Math.round(data.statsKelas.reduce((a, k) => a + k.rataKehadiran, 0) / data.statsKelas.length)}%`}
+          value={data.statsKelas.length > 0 ? `${Math.round(data.statsKelas.reduce((a, k) => a + k.rataKehadiran, 0) / data.statsKelas.length)}%` : '0%'}
           sub="Semua kelas"
-          icon={<CheckCircle size={24} />}
+          icon={CheckCircle}
           gradient="bg-gradient-to-br from-violet-600 to-violet-800"
         />
         <StatCard
           title="Perlu Perhatian"
           value={data.perigatanMhs.length}
           sub="Kehadiran < 75%"
-          icon={<AlertCircle size={24} />}
+          icon={AlertCircle}
           gradient="bg-gradient-to-br from-rose-600 to-rose-800"
         />
       </div>
@@ -126,7 +133,7 @@ export default function DosenDashboard() {
             <h2 className="font-bold text-slate-800">Jadwal Mengajar Hari Ini</h2>
           </div>
 
-          {data.jadwalHariIni.length > 0 ? (
+          { (data.jadwalHariIni && data.jadwalHariIni.length > 0) ? (
             <div className="divide-y divide-slate-100">
               {data.jadwalHariIni.map((j) => (
                 <div key={j.id} className="flex items-center px-6 py-4 hover:bg-slate-50 transition-colors gap-4">
@@ -160,7 +167,7 @@ export default function DosenDashboard() {
           </div>
           <div className="p-4 space-y-3">
             <p className="text-xs text-slate-500 px-2 pb-1">Kehadiran di bawah batas 75%</p>
-            {data.perigatanMhs.length > 0 ? data.perigatanMhs.map(m => (
+            { (data.perigatanMhs && data.perigatanMhs.length > 0) ? data.perigatanMhs.map(m => (
               <div key={m.id} className="p-3 bg-rose-50 rounded-xl border border-rose-100 flex justify-between items-center">
                 <div>
                   <p className="font-semibold text-slate-800 text-sm">{m.nama}</p>
@@ -201,7 +208,7 @@ export default function DosenDashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {data.statsKelas.map((k) => (
+              { (data.statsKelas || []).map((k) => (
                 <tr key={k.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4 font-bold text-slate-800">{k.kelas}</td>
                   <td className="px-6 py-4 text-slate-600">{k.mataKuliah}</td>

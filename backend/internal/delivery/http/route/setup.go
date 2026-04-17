@@ -13,6 +13,7 @@ func SetupRouter(
 	authHandler *handler.AuthHandler,
 	studentHandler *handler.StudentHandler,
 	adminHandler *handler.AdminHandler,
+	dosenHandler *handler.DosenHandler,
 ) *gin.Engine {
 	r := gin.Default()
 	r.Use(middleware.CORSMiddleware())
@@ -37,13 +38,16 @@ func SetupRouter(
 	dosenGroup := api.Group("/dosen")
 	dosenGroup.Use(middleware.AuthMiddleware(cfg), middleware.RoleMiddleware("dosen"))
 	{
-		_ = dosenGroup // placeholder
+		dosenGroup.GET("/dashboard", dosenHandler.GetDashboard)
+		dosenGroup.GET("/kelas", dosenHandler.GetKelas)
 	}
 
 	// ─── Admin (role: admin) ──────────────────────────────────────
 	admin := api.Group("/admin")
 	admin.Use(middleware.AuthMiddleware(cfg), middleware.RoleMiddleware("admin"))
 	{
+		admin.GET("/dashboard", adminHandler.GetDashboard)
+
 		// Dosen CRUD
 		admin.GET("/dosen", adminHandler.GetAllDosen)
 		admin.GET("/dosen/:id", adminHandler.GetDosenByID)

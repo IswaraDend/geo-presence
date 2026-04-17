@@ -52,6 +52,9 @@ type AdminUseCase interface {
 	CreateAbsensi(req CreateAbsensiRequest) error
 	UpdateAbsensi(id uuid.UUID, req UpdateAbsensiRequest) error
 	DeleteAbsensi(id uuid.UUID) error
+
+	// Dashboard
+	GetDashboardSummary() (*AdminDashboardSummary, error)
 }
 
 type adminUseCase struct {
@@ -158,6 +161,32 @@ type CreateAbsensiRequest struct {
 	PertemuanKe   int       `json:"pertemuan_ke" binding:"required"`
 	StatusAbsensi string    `json:"status_absensi" binding:"required"`
 	Keterangan    string    `json:"keterangan"`
+}
+
+type AdminDashboardSummary struct {
+	TotalStudents   int64               `json:"totalStudents"`
+	TotalCourses    int64               `json:"totalCourses"`
+	TotalSchedules  int64               `json:"totalSchedules"`
+	AttendanceToday float64             `json:"attendanceToday"`
+	RecentHistory   []AttendanceHistory `json:"recentAttendance"`
+	Warnings        []WarningInfo       `json:"warnings"`
+}
+
+type WarningInfo struct {
+	ID         string `json:"id"`
+	Nama       string `json:"nama"`
+	NIM        string `json:"nim"`
+	Kelas      string `json:"kelas"`
+	AbsenCount int    `json:"absenCount"`
+}
+
+type AttendanceHistory struct {
+	ID         string `json:"id"`
+	Nama       string `json:"nama"`
+	NIM        string `json:"nim"`
+	Waktu      string `json:"waktu"`
+	Status     string `json:"status"`
+	MataKuliah string `json:"mataKuliah"`
 }
 
 type UpdateAbsensiRequest struct {
@@ -499,4 +528,94 @@ func (u *adminUseCase) UpdateAbsensi(id uuid.UUID, req UpdateAbsensiRequest) err
 
 func (u *adminUseCase) DeleteAbsensi(id uuid.UUID) error {
 	return u.repo.DeleteAbsensi(id)
+}
+
+func (u *adminUseCase) GetDashboardSummary() (*AdminDashboardSummary, error) {
+	summary := &AdminDashboardSummary{}
+
+	// 1. Total Students
+	mhsList, err := u.repo.GetAllMahasiswa()
+	if err == nil {
+		summary.TotalStudents = int64(len(mhsList))
+	}
+
+	// 2. Total Courses
+	mkList, err := u.repo.GetAllMataKuliah()
+	if err == nil {
+		summary.TotalCourses = int64(len(mkList))
+	}
+
+	// 3. Total Schedules
+	jdList, err := u.repo.GetAllJadwal()
+	if err == nil {
+		summary.TotalSchedules = int64(len(jdList))
+	}
+
+	// 4. Attendance Today (%)
+	absensiList, err := u.repo.GetAllAbsensi()
+	if err == nil {
+		now := time.Now()
+		todayStr := now.Format("2006-01-02")
+		
+		var totalToday int64
+		var hadirToday int64
+		
+		for _, a := range absensiList {
+			if a.Tanggal.Format("2006-01-02") == todayStr {
+				totalToday++
+				if a.StatusAbsensi == "hadir" {
+					hadirToday++
+				}
+			}
+		}
+		
+		if totalToday > 0 {
+			summary.AttendanceToday = float64(hadirToday) / float64(totalToday) * 100
+		} else {
+			summary.AttendanceToday = 0
+		}
+
+		// 5. Recent History (last 5)
+		var recent []AttendanceHistory
+		count := 0
+		for i := len(absensiList) - 1; i >= 0 && count < 5; i-- {
+			a := absensiList[i]
+			recent = append(recent, AttendanceHistory{
+				ID:         a.ID.String(),
+				Nama:       a.Mahasiswa.User.Nama,
+				NIM:        a.Mahasiswa.NIM,
+				Waktu:      a.CreatedAt.Format("15:04"),
+				Status:     a.StatusAbsensi,
+				MataKuliah: a.Jadwal.MataKuliah.NamaMK,
+			})
+			count++
+		}
+		summary.RecentHistory = recent
+
+		// 6. Warnings (Students with >= 3 absences)
+		// Logic: Group absensi by student_id where status is 'alfa'
+		alfaMap := make(map[uuid.UUID]int)
+		for _, a := range absensiList {
+			if a.StatusAbsensi == "alfa" {
+				alfaMap[a.MahasiswaID]++
+			}
+		}
+
+		var warnings []WarningInfo
+		for _, m := range mhsList {
+			count := alfaMap[m.ID]
+			if count >= 3 {
+				warnings = append(warnings, WarningInfo{
+					ID:         m.ID.String(),
+					Nama:       m.User.Nama,
+					NIM:        m.NIM,
+					Kelas:      m.Kelas.NamaKelas,
+					AbsenCount: count,
+				})
+			}
+		}
+		summary.Warnings = warnings
+	}
+
+	return summary, nil
 }

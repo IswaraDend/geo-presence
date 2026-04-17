@@ -77,74 +77,6 @@ export default function AdminJadwal() {
 
   const hariColors = { Senin: 'bg-blue-100 text-blue-700', Selasa: 'bg-indigo-100 text-indigo-700', Rabu: 'bg-violet-100 text-violet-700', Kamis: 'bg-purple-100 text-purple-700', Jumat: 'bg-emerald-100 text-emerald-700', Sabtu: 'bg-orange-100 text-orange-700' };
 
-  const FormBody = () => (
-    <>
-      {error && <p className="bg-rose-50 text-rose-600 text-sm px-4 py-2 rounded-lg border border-rose-200">{error}</p>}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Kelas</label>
-          <select required value={form.kelas_id} onChange={e => setForm(p => ({ ...p, kelas_id: e.target.value }))}
-            className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-            <option value="">-- Pilih Kelas --</option>
-            {kelasList.map(k => <option key={k.id} value={k.id}>{k.nama_kelas}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Mata Kuliah</label>
-          <select required value={form.mata_kuliah_id} onChange={e => setForm(p => ({ ...p, mata_kuliah_id: e.target.value }))}
-            className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-            <option value="">-- Pilih MK --</option>
-            {mkList.map(mk => <option key={mk.id} value={mk.id}>{mk.nama_mk}</option>)}
-          </select>
-        </div>
-        <div className="sm:col-span-2">
-          <label className="block text-sm font-medium text-slate-700 mb-1">Dosen Pengampu</label>
-          <select required value={form.dosen_id} onChange={e => setForm(p => ({ ...p, dosen_id: e.target.value }))}
-            className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-            <option value="">-- Pilih Dosen --</option>
-            {dosenList.map(d => <option key={d.id} value={d.id}>{d.user?.nama} ({d.nidn})</option>)}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Hari</label>
-          <select required value={form.hari} onChange={e => setForm(p => ({ ...p, hari: e.target.value }))}
-            className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-            <option value="">-- Pilih Hari --</option>
-            {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Ruang</label>
-          <input value={form.ruang} onChange={e => setForm(p => ({ ...p, ruang: e.target.value }))} placeholder="Lab 2 / R.101"
-            className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Jam Mulai</label>
-          <input required type="time" value={form.jam_mulai} onChange={e => setForm(p => ({ ...p, jam_mulai: e.target.value }))}
-            className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Jam Selesai</label>
-          <input required type="time" value={form.jam_selesai} onChange={e => setForm(p => ({ ...p, jam_selesai: e.target.value }))}
-            className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Semester</label>
-          <select value={form.semester} onChange={e => setForm(p => ({ ...p, semester: e.target.value }))}
-            className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-            <option value="">-- Pilih --</option>
-            {[1,2,3,4,5,6,7,8].map(s => <option key={s} value={s}>Semester {s}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Tahun Ajar</label>
-          <input value={form.tahun_ajar} onChange={e => setForm(p => ({ ...p, tahun_ajar: e.target.value }))} placeholder="2024/2025"
-            className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-      </div>
-    </>
-  );
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -210,7 +142,70 @@ export default function AdminJadwal() {
       </div>
 
       <Modal open={modal.type === 'create'} onClose={closeModal} title="Tambah Jadwal Kuliah" size="lg">
-        <form onSubmit={handleCreate} className="space-y-4"><FormBody />
+        <form onSubmit={handleCreate} className="space-y-4">
+          {error && <p className="bg-rose-50 text-rose-600 text-sm px-4 py-2 rounded-lg border border-rose-200">{error}</p>}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Kelas</label>
+              <select required value={form.kelas_id} onChange={e => setForm(p => ({ ...p, kelas_id: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <option value="">-- Pilih Kelas --</option>
+                {kelasList.map(k => <option key={k.id} value={k.id}>{k.nama_kelas}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Mata Kuliah</label>
+              <select required value={form.mata_kuliah_id} onChange={e => setForm(p => ({ ...p, mata_kuliah_id: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <option value="">-- Pilih MK --</option>
+                {mkList.map(mk => <option key={mk.id} value={mk.id}>{mk.nama_mk}</option>)}
+              </select>
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-medium text-slate-700 mb-1">Dosen Pengampu</label>
+              <select required value={form.dosen_id} onChange={e => setForm(p => ({ ...p, dosen_id: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <option value="">-- Pilih Dosen --</option>
+                {dosenList.map(d => <option key={d.id} value={d.id}>{d.user?.nama} ({d.nidn})</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Hari</label>
+              <select required value={form.hari} onChange={e => setForm(p => ({ ...p, hari: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <option value="">-- Pilih Hari --</option>
+                {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Ruang</label>
+              <input value={form.ruang} onChange={e => setForm(p => ({ ...p, ruang: e.target.value }))} placeholder="Lab 2 / R.101"
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Jam Mulai</label>
+              <input required type="time" value={form.jam_mulai} onChange={e => setForm(p => ({ ...p, jam_mulai: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Jam Selesai</label>
+              <input required type="time" value={form.jam_selesai} onChange={e => setForm(p => ({ ...p, jam_selesai: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Semester</label>
+              <select value={form.semester} onChange={e => setForm(p => ({ ...p, semester: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <option value="">-- Pilih --</option>
+                {[1,2,3,4,5,6,7,8].map(s => <option key={s} value={s}>Semester {s}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Tahun Ajar</label>
+              <input value={form.tahun_ajar} onChange={e => setForm(p => ({ ...p, tahun_ajar: e.target.value }))} placeholder="2024/2025"
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={closeModal} className="px-5 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium">Batal</button>
             <button type="submit" disabled={saving} className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-semibold">{saving ? 'Menyimpan...' : 'Simpan'}</button>
@@ -219,7 +214,70 @@ export default function AdminJadwal() {
       </Modal>
 
       <Modal open={modal.type === 'edit'} onClose={closeModal} title="Edit Jadwal Kuliah" size="lg">
-        <form onSubmit={handleEdit} className="space-y-4"><FormBody />
+        <form onSubmit={handleEdit} className="space-y-4">
+          {error && <p className="bg-rose-50 text-rose-600 text-sm px-4 py-2 rounded-lg border border-rose-200">{error}</p>}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Kelas</label>
+              <select required value={form.kelas_id} onChange={e => setForm(p => ({ ...p, kelas_id: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <option value="">-- Pilih Kelas --</option>
+                {kelasList.map(k => <option key={k.id} value={k.id}>{k.nama_kelas}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Mata Kuliah</label>
+              <select required value={form.mata_kuliah_id} onChange={e => setForm(p => ({ ...p, mata_kuliah_id: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <option value="">-- Pilih MK --</option>
+                {mkList.map(mk => <option key={mk.id} value={mk.id}>{mk.nama_mk}</option>)}
+              </select>
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-medium text-slate-700 mb-1">Dosen Pengampu</label>
+              <select required value={form.dosen_id} onChange={e => setForm(p => ({ ...p, dosen_id: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <option value="">-- Pilih Dosen --</option>
+                {dosenList.map(d => <option key={d.id} value={d.id}>{d.user?.nama} ({d.nidn})</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Hari</label>
+              <select required value={form.hari} onChange={e => setForm(p => ({ ...p, hari: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <option value="">-- Pilih Hari --</option>
+                {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Ruang</label>
+              <input value={form.ruang} onChange={e => setForm(p => ({ ...p, ruang: e.target.value }))} placeholder="Lab 2 / R.101"
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Jam Mulai</label>
+              <input required type="time" value={form.jam_mulai} onChange={e => setForm(p => ({ ...p, jam_mulai: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Jam Selesai</label>
+              <input required type="time" value={form.jam_selesai} onChange={e => setForm(p => ({ ...p, jam_selesai: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Semester</label>
+              <select value={form.semester} onChange={e => setForm(p => ({ ...p, semester: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <option value="">-- Pilih --</option>
+                {[1,2,3,4,5,6,7,8].map(s => <option key={s} value={s}>Semester {s}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Tahun Ajar</label>
+              <input value={form.tahun_ajar} onChange={e => setForm(p => ({ ...p, tahun_ajar: e.target.value }))} placeholder="2024/2025"
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={closeModal} className="px-5 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium">Batal</button>
             <button type="submit" disabled={saving} className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white text-sm font-semibold">{saving ? 'Menyimpan...' : 'Perbarui'}</button>

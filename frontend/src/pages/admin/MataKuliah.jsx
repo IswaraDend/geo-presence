@@ -63,37 +63,6 @@ export default function AdminMataKuliah() {
 
   const semesterColors = ['', 'bg-blue-100 text-blue-700', 'bg-indigo-100 text-indigo-700', 'bg-violet-100 text-violet-700', 'bg-purple-100 text-purple-700', 'bg-pink-100 text-pink-700', 'bg-rose-100 text-rose-700', 'bg-orange-100 text-orange-700', 'bg-amber-100 text-amber-700'];
 
-  const FormFields = () => (
-    <>
-      {error && <p className="bg-rose-50 text-rose-600 text-sm px-4 py-2 rounded-lg border border-rose-200">{error}</p>}
-      <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Kode Mata Kuliah</label>
-        <input required value={form.kode_mk} onChange={e => setForm(p => ({ ...p, kode_mk: e.target.value }))}
-          placeholder="MK001" className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Nama Mata Kuliah</label>
-        <input required value={form.nama_mk} onChange={e => setForm(p => ({ ...p, nama_mk: e.target.value }))}
-          placeholder="Pemrograman Web" className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">SKS</label>
-          <input required type="number" min="1" max="6" value={form.sks} onChange={e => setForm(p => ({ ...p, sks: e.target.value }))}
-            className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Semester</label>
-          <select required value={form.semester} onChange={e => setForm(p => ({ ...p, semester: e.target.value }))}
-            className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-            <option value="">-- Pilih --</option>
-            {[1,2,3,4,5,6,7,8].map(s => <option key={s} value={s}>Semester {s}</option>)}
-          </select>
-        </div>
-      </div>
-    </>
-  );
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -161,7 +130,33 @@ export default function AdminMataKuliah() {
       </div>
 
       <Modal open={modal.type === 'create'} onClose={closeModal} title="Tambah Mata Kuliah">
-        <form onSubmit={handleCreate} className="space-y-4"><FormFields />
+        <form onSubmit={handleCreate} className="space-y-4">
+          {error && <p className="bg-rose-50 text-rose-600 text-sm px-4 py-2 rounded-lg border border-rose-200">{error}</p>}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Kode Mata Kuliah</label>
+            <input required value={form.kode_mk} onChange={e => setForm(p => ({ ...p, kode_mk: e.target.value }))}
+              placeholder="MK001" className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Nama Mata Kuliah</label>
+            <input required value={form.nama_mk} onChange={e => setForm(p => ({ ...p, nama_mk: e.target.value }))}
+              placeholder="Pemrograman Web" className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">SKS</label>
+              <input required type="number" min="1" max="6" value={form.sks} onChange={e => setForm(p => ({ ...p, sks: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Semester</label>
+              <select required value={form.semester} onChange={e => setForm(p => ({ ...p, semester: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <option value="">-- Pilih --</option>
+                {[1,2,3,4,5,6,7,8].map(s => <option key={s} value={s}>Semester {s}</option>)}
+              </select>
+            </div>
+          </div>
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={closeModal} className="px-5 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium">Batal</button>
             <button type="submit" disabled={saving} className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-semibold">{saving ? 'Menyimpan...' : 'Simpan'}</button>
@@ -170,7 +165,33 @@ export default function AdminMataKuliah() {
       </Modal>
 
       <Modal open={modal.type === 'edit'} onClose={closeModal} title="Edit Mata Kuliah">
-        <form onSubmit={handleEdit} className="space-y-4"><FormFields />
+        <form onSubmit={handleEdit} className="space-y-4">
+          {error && <p className="bg-rose-50 text-rose-600 text-sm px-4 py-2 rounded-lg border border-rose-200">{error}</p>}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Kode Mata Kuliah</label>
+            <input required value={form.kode_mk} onChange={e => setForm(p => ({ ...p, kode_mk: e.target.value }))}
+              placeholder="MK001" className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Nama Mata Kuliah</label>
+            <input required value={form.nama_mk} onChange={e => setForm(p => ({ ...p, nama_mk: e.target.value }))}
+              placeholder="Pemrograman Web" className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">SKS</label>
+              <input required type="number" min="1" max="6" value={form.sks} onChange={e => setForm(p => ({ ...p, sks: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Semester</label>
+              <select required value={form.semester} onChange={e => setForm(p => ({ ...p, semester: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <option value="">-- Pilih --</option>
+                {[1,2,3,4,5,6,7,8].map(s => <option key={s} value={s}>Semester {s}</option>)}
+              </select>
+            </div>
+          </div>
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={closeModal} className="px-5 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium">Batal</button>
             <button type="submit" disabled={saving} className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white text-sm font-semibold">{saving ? 'Menyimpan...' : 'Perbarui'}</button>

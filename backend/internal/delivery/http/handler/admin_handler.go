@@ -421,3 +421,14 @@ func (h *AdminHandler) DeleteAbsensi(c *gin.Context) {
 	}
 	response.Success(c, http.StatusOK, "Absensi berhasil dihapus", nil)
 }
+
+// ─── Dashboard ────────────────────────────────────────────────
+
+func (h *AdminHandler) GetDashboard(c *gin.Context) {
+	summary, err := h.useCase.GetDashboardSummary()
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "Gagal memuat data dashboard")
+		return
+	}
+	response.Success(c, http.StatusOK, "Data dashboard admin", summary)
+}

@@ -61,37 +61,6 @@ export default function AdminKelas() {
     k.jurusan?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const FormFields = () => (
-    <>
-      {error && <p className="bg-rose-50 text-rose-600 text-sm px-4 py-2 rounded-lg border border-rose-200">{error}</p>}
-      <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Nama Kelas</label>
-        <input required value={form.nama_kelas} onChange={e => setForm(p => ({ ...p, nama_kelas: e.target.value }))}
-          placeholder="e.g. TI-3A" className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Jurusan</label>
-        <input required value={form.jurusan} onChange={e => setForm(p => ({ ...p, jurusan: e.target.value }))}
-          placeholder="e.g. Teknik Informatika" className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Angkatan</label>
-          <input required type="number" min="2000" max="2100" value={form.angkatan} onChange={e => setForm(p => ({ ...p, angkatan: e.target.value }))}
-            placeholder="2023" className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Semester</label>
-          <select required value={form.semester} onChange={e => setForm(p => ({ ...p, semester: e.target.value }))}
-            className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-            <option value="">-- Pilih --</option>
-            {[1,2,3,4,5,6,7,8].map(s => <option key={s} value={s}>Semester {s}</option>)}
-          </select>
-        </div>
-      </div>
-    </>
-  );
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -161,7 +130,33 @@ export default function AdminKelas() {
       </div>
 
       <Modal open={modal.type === 'create'} onClose={closeModal} title="Tambah Kelas">
-        <form onSubmit={handleCreate} className="space-y-4"><FormFields />
+        <form onSubmit={handleCreate} className="space-y-4">
+          {error && <p className="bg-rose-50 text-rose-600 text-sm px-4 py-2 rounded-lg border border-rose-200">{error}</p>}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Nama Kelas</label>
+            <input required value={form.nama_kelas} onChange={e => setForm(p => ({ ...p, nama_kelas: e.target.value }))}
+              placeholder="e.g. TI-3A" className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Jurusan</label>
+            <input required value={form.jurusan} onChange={e => setForm(p => ({ ...p, jurusan: e.target.value }))}
+              placeholder="e.g. Teknik Informatika" className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Angkatan</label>
+              <input required type="number" min="2000" max="2100" value={form.angkatan} onChange={e => setForm(p => ({ ...p, angkatan: e.target.value }))}
+                placeholder="2023" className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Semester</label>
+              <select required value={form.semester} onChange={e => setForm(p => ({ ...p, semester: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <option value="">-- Pilih --</option>
+                {[1,2,3,4,5,6,7,8].map(s => <option key={s} value={s}>Semester {s}</option>)}
+              </select>
+            </div>
+          </div>
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={closeModal} className="px-5 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium">Batal</button>
             <button type="submit" disabled={saving} className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-semibold">{saving ? 'Menyimpan...' : 'Simpan'}</button>
@@ -170,7 +165,33 @@ export default function AdminKelas() {
       </Modal>
 
       <Modal open={modal.type === 'edit'} onClose={closeModal} title="Edit Kelas">
-        <form onSubmit={handleEdit} className="space-y-4"><FormFields />
+        <form onSubmit={handleEdit} className="space-y-4">
+          {error && <p className="bg-rose-50 text-rose-600 text-sm px-4 py-2 rounded-lg border border-rose-200">{error}</p>}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Nama Kelas</label>
+            <input required value={form.nama_kelas} onChange={e => setForm(p => ({ ...p, nama_kelas: e.target.value }))}
+              placeholder="e.g. TI-3A" className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Jurusan</label>
+            <input required value={form.jurusan} onChange={e => setForm(p => ({ ...p, jurusan: e.target.value }))}
+              placeholder="e.g. Teknik Informatika" className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Angkatan</label>
+              <input required type="number" min="2000" max="2100" value={form.angkatan} onChange={e => setForm(p => ({ ...p, angkatan: e.target.value }))}
+                placeholder="2023" className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Semester</label>
+              <select required value={form.semester} onChange={e => setForm(p => ({ ...p, semester: e.target.value }))}
+                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <option value="">-- Pilih --</option>
+                {[1,2,3,4,5,6,7,8].map(s => <option key={s} value={s}>Semester {s}</option>)}
+              </select>
+            </div>
+          </div>
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={closeModal} className="px-5 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium">Batal</button>
             <button type="submit" disabled={saving} className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white text-sm font-semibold">{saving ? 'Menyimpan...' : 'Perbarui'}</button>
