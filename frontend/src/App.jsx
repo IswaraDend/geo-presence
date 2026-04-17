@@ -17,6 +17,7 @@ import AdminDashboard from './pages/admin/Dashboard';
 import AdminDosen from './pages/admin/Dosen';
 import AdminMahasiswa from './pages/admin/Mahasiswa';
 import AdminMataKuliah from './pages/admin/MataKuliah';
+import AdminKelas from './pages/admin/Kelas';
 import AdminJadwal from './pages/admin/Jadwal';
 import AdminAbsensi from './pages/admin/Absensi';
 
@@ -41,11 +42,15 @@ const ProtectedRoute = ({ children, allowedRole }) => {
 
   if (!user) return <Navigate to="/login" replace />;
 
-  if (allowedRole && user.role !== allowedRole) {
-    // Redirect ke dashboard yang sesuai role user
-    if (user.role === 'admin') return <Navigate to="/admin" replace />;
-    if (user.role === 'dosen') return <Navigate to="/dosen" replace />;
-    return <Navigate to="/" replace />;
+  const userRole = (user.role || '').toLowerCase();
+  const targetRole = (allowedRole || '').toLowerCase();
+
+  if (targetRole && userRole !== targetRole) {
+    console.warn(`Access denied. Role: ${userRole}, Expected: ${targetRole}`);
+    if (userRole === 'admin') return <Navigate to="/admin" replace />;
+    if (userRole === 'dosen') return <Navigate to="/dosen" replace />;
+    if (userRole === 'mahasiswa') return <Navigate to="/student" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return children;
@@ -56,9 +61,13 @@ const RootRedirect = () => {
   const { user, loading } = useAuth();
   if (loading) return null;
   if (!user) return <Navigate to="/login" replace />;
-  if (user.role === 'admin') return <Navigate to="/admin" replace />;
-  if (user.role === 'dosen') return <Navigate to="/dosen" replace />;
-  return <Navigate to="/student" replace />;
+  
+  const role = (user.role || '').toLowerCase();
+  if (role === 'admin') return <Navigate to="/admin" replace />;
+  if (role === 'dosen') return <Navigate to="/dosen" replace />;
+  if (role === 'mahasiswa') return <Navigate to="/student" replace />;
+  
+  return <Navigate to="/login" replace />;
 };
 
 // Placeholder
@@ -104,6 +113,7 @@ function AppRoutes() {
         <Route index element={<AdminDashboard />} />
         <Route path="dosen" element={<AdminDosen />} />
         <Route path="students" element={<AdminMahasiswa />} />
+        <Route path="classes" element={<AdminKelas />} />
         <Route path="courses" element={<AdminMataKuliah />} />
         <Route path="schedules" element={<AdminJadwal />} />
         <Route path="attendances" element={<AdminAbsensi />} />

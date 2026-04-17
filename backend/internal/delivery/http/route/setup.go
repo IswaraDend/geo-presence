@@ -58,8 +58,12 @@ func SetupRouter(
 		admin.PUT("/mahasiswa/:id", adminHandler.UpdateMahasiswa)
 		admin.DELETE("/mahasiswa/:id", adminHandler.DeleteMahasiswa)
 
-		// Kelas (read-only, manage via seed/migration)
+		// Kelas CRUD
 		admin.GET("/kelas", adminHandler.GetAllKelas)
+		admin.GET("/kelas/:id", adminHandler.GetKelasByID)
+		admin.POST("/kelas", adminHandler.CreateKelas)
+		admin.PUT("/kelas/:id", adminHandler.UpdateKelas)
+		admin.DELETE("/kelas/:id", adminHandler.DeleteKelas)
 
 		// Mata Kuliah CRUD
 		admin.GET("/matakuliah", adminHandler.GetAllMataKuliah)

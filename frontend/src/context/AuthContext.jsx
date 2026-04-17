@@ -13,7 +13,9 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           const res = await api.get('/auth/me');
-          setUser(res.data.data);
+          const rawData = res.data.data;
+          const userData = rawData.user ? { ...rawData.user, ...rawData } : rawData;
+          setUser(userData);
         } catch (error) {
           console.error('Failed to fetch user:', error);
           localStorage.removeItem('token');
@@ -30,8 +32,13 @@ export const AuthProvider = ({ children }) => {
     const { token, role } = res.data.data;
     localStorage.setItem('token', token);
     const userRes = await api.get('/auth/me');
-    setUser(userRes.data.data);
-    return { user: userRes.data.data, role };
+    
+    // Tangani inkonsistensi backend: jika ada nested 'user', ambil isi dalamnya
+    const rawData = userRes.data.data;
+    const userData = rawData.user ? { ...rawData.user, ...rawData } : rawData;
+    
+    setUser(userData);
+    return { user: userData, role };
   };
 
   const logout = () => {

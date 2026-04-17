@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
-import { AlertTriangle, X, Calendar, Clock, BookOpen, CheckCircle2, XCircle, AlertCircle, Timer } from 'lucide-react';
+import { AlertTriangle, X, Calendar, Clock, BookOpen, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import api from '../../api/axios';
 
 const statusConfig = {
@@ -15,15 +15,18 @@ export default function StudentDashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showWarning, setShowWarning] = useState(false);
+  const [errorStatus, setErrorStatus] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await api.get('/student/dashboard');
+        console.log('Dashboard Data:', res.data.data);
         setData(res.data.data);
-        if (res.data.data.has_warning) setShowWarning(true);
+        if (res.data.data?.has_warning) setShowWarning(true);
       } catch (err) {
-        console.error(err);
+        console.error('Dashboard Error:', err);
+        setErrorStatus(err.response?.status || 500);
       } finally {
         setLoading(false);
       }
@@ -45,16 +48,17 @@ export default function StudentDashboard() {
   if (!data) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
+        <div className="text-center bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
           <XCircle size={48} className="text-rose-400 mx-auto mb-3" />
-          <p className="text-slate-600 font-medium">Gagal memuat data dashboard.</p>
+          <p className="text-slate-600 font-bold">Data tidak ditemukan</p>
+          <p className="text-slate-400 text-sm mt-1">Status: {errorStatus || 'Unknown'}</p>
         </div>
       </div>
     );
   }
 
-  const k = data.kehadiran;
-  const percentage = Math.round(k?.persentase ?? 0);
+  const k = data.kehadiran || {};
+  const percentage = Math.round(Number(k.persentase) || 0);
   const isKritis = percentage < 75;
 
   return (
@@ -131,7 +135,7 @@ export default function StudentDashboard() {
         {/* Donut Chart Kehadiran */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col items-center">
           <h3 className="w-full text-left font-bold text-slate-800 mb-5 flex items-center gap-2">
-            <CheckCircle2 size={18} className="text-blue-500" /> Ringkasan Kehadiran
+            <CheckCircle size={18} className="text-blue-500" /> Ringkasan Kehadiran
           </h3>
           <div className="w-44 h-44 mb-6">
             <CircularProgressbar

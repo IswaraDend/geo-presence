@@ -24,6 +24,10 @@ type AdminRepository interface {
 
 	// Kelas
 	GetAllKelas() ([]entity.Kelas, error)
+	GetKelasByID(id uuid.UUID) (*entity.Kelas, error)
+	CreateKelas(k *entity.Kelas) error
+	UpdateKelas(k *entity.Kelas) error
+	DeleteKelas(id uuid.UUID) error
 
 	// Mata Kuliah
 	GetAllMataKuliah() ([]entity.MataKuliah, error)
@@ -149,6 +153,24 @@ func (r *adminRepository) GetAllKelas() ([]entity.Kelas, error) {
 	var list []entity.Kelas
 	err := r.db.Find(&list).Error
 	return list, err
+}
+
+func (r *adminRepository) GetKelasByID(id uuid.UUID) (*entity.Kelas, error) {
+	var k entity.Kelas
+	err := r.db.First(&k, id).Error
+	return &k, err
+}
+
+func (r *adminRepository) CreateKelas(k *entity.Kelas) error {
+	return r.db.Create(k).Error
+}
+
+func (r *adminRepository) UpdateKelas(k *entity.Kelas) error {
+	return r.db.Save(k).Error
+}
+
+func (r *adminRepository) DeleteKelas(id uuid.UUID) error {
+	return r.db.Delete(&entity.Kelas{}, id).Error
 }
 
 // ─── Mata Kuliah ────────────────────────────────────────────

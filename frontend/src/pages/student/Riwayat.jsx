@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Filter, CheckCircle2, XCircle, AlertCircle, Calendar } from 'lucide-react';
+import { useState } from 'react';
+import { CheckCircle, XCircle, AlertCircle, Calendar } from 'lucide-react';
 
 const mockRiwayat = [
   { id: 1, mk: 'Pemrograman Web', tanggal: '2026-04-15', status: 'Hadir', waktu: '08:15', pertemuan: 7 },
@@ -65,7 +65,7 @@ export default function Riwayat() {
                         r.status === 'Izin' ? 'bg-amber-100 text-amber-700 border border-amber-200' :
                         'bg-rose-100 text-rose-700 border border-rose-200'
                       }`}>
-                        {r.status === 'Hadir' && <CheckCircle2 size={12} />}
+                        {r.status === 'Hadir' && <CheckCircle size={12} />}
                         {r.status === 'Izin' && <AlertCircle size={12} />}
                         {r.status === 'Alfa' && <XCircle size={12} />}
                         {r.status}

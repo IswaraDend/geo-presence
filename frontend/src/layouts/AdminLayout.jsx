@@ -1,4 +1,4 @@
-import { Shield, Home, Users, BookOpen, Calendar as CalendarIcon, ClipboardList, LogOut, Menu, X, GraduationCap } from 'lucide-react';
+import { Shield, Home, Users, BookOpen, Calendar as CalendarIcon, ClipboardList, LogOut, Menu, X, GraduationCap, LayoutGrid } from 'lucide-react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
@@ -17,6 +17,7 @@ export default function AdminLayout() {
     { to: '/admin', icon: <Home size={20} />, label: 'Dashboard' },
     { to: '/admin/dosen', icon: <GraduationCap size={20} />, label: 'Dosen' },
     { to: '/admin/students', icon: <Users size={20} />, label: 'Mahasiswa' },
+    { to: '/admin/classes', icon: <LayoutGrid size={20} />, label: 'Kelas' },
     { to: '/admin/courses', icon: <BookOpen size={20} />, label: 'Mata Kuliah' },
     { to: '/admin/schedules', icon: <CalendarIcon size={20} />, label: 'Jadwal' },
     { to: '/admin/attendances', icon: <ClipboardList size={20} />, label: 'Absensi' },

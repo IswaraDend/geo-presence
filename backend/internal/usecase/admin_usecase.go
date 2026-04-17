@@ -27,6 +27,10 @@ type AdminUseCase interface {
 
 	// Kelas
 	GetAllKelas() ([]entity.Kelas, error)
+	GetKelasByID(id uuid.UUID) (*entity.Kelas, error)
+	CreateKelas(req CreateKelasRequest) error
+	UpdateKelas(id uuid.UUID, req UpdateKelasRequest) error
+	DeleteKelas(id uuid.UUID) error
 
 	// Mata Kuliah
 	GetAllMataKuliah() ([]entity.MataKuliah, error)
@@ -93,6 +97,20 @@ type UpdateMahasiswaRequest struct {
 	NoHP        string    `json:"no_hp"`
 	Alamat      string    `json:"alamat"`
 	StatusAktif *bool     `json:"status_aktif"`
+}
+
+type CreateKelasRequest struct {
+	NamaKelas string `json:"nama_kelas" binding:"required"`
+	Jurusan   string `json:"jurusan" binding:"required"`
+	Angkatan  int    `json:"angkatan" binding:"required"`
+	Semester  int    `json:"semester" binding:"required"`
+}
+
+type UpdateKelasRequest struct {
+	NamaKelas string `json:"nama_kelas"`
+	Jurusan   string `json:"jurusan"`
+	Angkatan  int    `json:"angkatan"`
+	Semester  int    `json:"semester"`
 }
 
 type CreateMataKuliahRequest struct {
@@ -288,6 +306,44 @@ func (u *adminUseCase) DeleteMahasiswa(id uuid.UUID) error {
 
 func (u *adminUseCase) GetAllKelas() ([]entity.Kelas, error) {
 	return u.repo.GetAllKelas()
+}
+
+func (u *adminUseCase) GetKelasByID(id uuid.UUID) (*entity.Kelas, error) {
+	return u.repo.GetKelasByID(id)
+}
+
+func (u *adminUseCase) CreateKelas(req CreateKelasRequest) error {
+	k := entity.Kelas{
+		NamaKelas: req.NamaKelas,
+		Jurusan:   req.Jurusan,
+		Angkatan:  req.Angkatan,
+		Semester:  req.Semester,
+	}
+	return u.repo.CreateKelas(&k)
+}
+
+func (u *adminUseCase) UpdateKelas(id uuid.UUID, req UpdateKelasRequest) error {
+	k, err := u.repo.GetKelasByID(id)
+	if err != nil {
+		return errors.New("kelas tidak ditemukan")
+	}
+	if req.NamaKelas != "" {
+		k.NamaKelas = req.NamaKelas
+	}
+	if req.Jurusan != "" {
+		k.Jurusan = req.Jurusan
+	}
+	if req.Angkatan > 0 {
+		k.Angkatan = req.Angkatan
+	}
+	if req.Semester > 0 {
+		k.Semester = req.Semester
+	}
+	return u.repo.UpdateKelas(k)
+}
+
+func (u *adminUseCase) DeleteKelas(id uuid.UUID) error {
+	return u.repo.DeleteKelas(id)
 }
 
 // ─── Mata Kuliah ──────────────────────────────────────────────

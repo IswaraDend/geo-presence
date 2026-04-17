@@ -169,6 +169,61 @@ func (h *AdminHandler) GetAllKelas(c *gin.Context) {
 	response.Success(c, http.StatusOK, "Data kelas berhasil diambil", list)
 }
 
+func (h *AdminHandler) GetKelasByID(c *gin.Context) {
+	id, ok := parseUUID(c, "id")
+	if !ok {
+		return
+	}
+	k, err := h.useCase.GetKelasByID(id)
+	if err != nil {
+		response.Error(c, http.StatusNotFound, "Kelas tidak ditemukan")
+		return
+	}
+	response.Success(c, http.StatusOK, "Detail kelas", k)
+}
+
+func (h *AdminHandler) CreateKelas(c *gin.Context) {
+	var req usecase.CreateKelasRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := h.useCase.CreateKelas(req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	response.Success(c, http.StatusCreated, "Kelas berhasil ditambahkan", nil)
+}
+
+func (h *AdminHandler) UpdateKelas(c *gin.Context) {
+	id, ok := parseUUID(c, "id")
+	if !ok {
+		return
+	}
+	var req usecase.UpdateKelasRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := h.useCase.UpdateKelas(id, req); err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.Success(c, http.StatusOK, "Kelas berhasil diperbarui", nil)
+}
+
+func (h *AdminHandler) DeleteKelas(c *gin.Context) {
+	id, ok := parseUUID(c, "id")
+	if !ok {
+		return
+	}
+	if err := h.useCase.DeleteKelas(id); err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.Success(c, http.StatusOK, "Kelas berhasil dihapus", nil)
+}
+
 // ─── Mata Kuliah ──────────────────────────────────────────────
 
 func (h *AdminHandler) GetAllMataKuliah(c *gin.Context) {
